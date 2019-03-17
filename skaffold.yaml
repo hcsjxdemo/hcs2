@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/hcsjxdemo/hcs2:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/hcsjxdemo/hcs2:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: hcs2
+        chartPath: charts/hcs2
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/hcsjxdemo/hcs2'
+          image.tag: '{{.DIGEST_HEX}}'
